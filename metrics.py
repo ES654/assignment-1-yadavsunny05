@@ -1,5 +1,6 @@
 
 def accuracy(y_hat, y):
+
     """
     Function to calculate the accuracy
 
@@ -15,8 +16,12 @@ def accuracy(y_hat, y):
     ensure that the function does not fail in corner cases.
     """
     assert(y_hat.size == y.size)
+    correct = 0
+    for i in range(len(y_hat)):
+        if(y_hat[i] == y[i]):
+            correct+=1
+    return(float(correct/len(y)*100))
     # TODO: Write here
-    pass
 
 def precision(y_hat, y, cls):
     """
