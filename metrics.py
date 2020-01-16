@@ -17,6 +17,8 @@ def accuracy(y_hat, y):
     """
     assert(y_hat.size == y.size)
     correct = 0
+    y_hat = list(y_hat[0])
+    y = list(y[0])
     for i in range(len(y_hat)):
         if(y_hat[i] == y[i]):
             correct+=1
@@ -37,6 +39,8 @@ def precision(y_hat, y, cls):
     assert(y_hat.size==y.size)
     TP = 0
     TP_FP = 0
+    y_hat = list(y_hat[0])
+    y = list(y[0])
     for i in range(len(y_hat)):
         if(y_hat[i]==cls):
             if(y_hat[i]==y[i]):
@@ -61,12 +65,14 @@ def recall(y_hat, y, cls):
     assert(y_hat.size==y.size)
     TP = 0
     TP_TN = 0
+    y_hat = list(y_hat[0])
+    y = list(y[0])
     for i in range(len(y_hat)):
         if(y[i]==cls):
             if(y[i]==y_hat[i]):
                 TP+=1
             TP_TN +=1
-    return TP/TP_TP
+    return TP/TP_TN
     pass
 
 def rmse(y_hat, y):
@@ -79,7 +85,8 @@ def rmse(y_hat, y):
     Output:
     > Returns the rmse as float
     """
-
+    y_hat = list(y_hat[0])
+    y = list(y[0])
     ans = 0
     for i in range(len(y_hat)):
         ans = ans + (y_hat[i] - y[i])**2
@@ -97,6 +104,8 @@ def mae(y_hat, y):
     > Returns the mae as float
     """
     ans = 0
+    y_hat = list(y_hat[0])
+    y = list(y[0])
     for i in range(len(y_hat)):
         ans = ans + abs(y_hat[i] - y[i])
     return((ans)/len(y))
