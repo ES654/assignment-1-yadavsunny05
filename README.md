@@ -13,7 +13,7 @@ The code should be written in Python and not use existing libraries other than t
       - `base.py` : Complete Decision Tree Class.
       - `utils.py`: Complete all utility functions.
       - `__init__.py`: **Do not edit this**
-    
+
     > You should run _usage.py_ to check your solutions. 
 
 2. 
@@ -43,3 +43,8 @@ The Google Doc will be the **_only_** medium for query resolution.
 
  
 
+References : - 
+
+1 https://machinelearningmastery.com/implement-decision-tree-algorithm-scratch-python/
+2 https://github.com/joachimvalente/decision-tree-cart/blob/master/minimal_cart.py#L14-L79
+3 https://towardsdatascience.com/decision-tree-from-scratch-in-python-46e99dfea775

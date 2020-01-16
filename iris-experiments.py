@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tree.base import DecisionTree
 from metrics import *
+from sklearn.model_selection import train_test_split
+
 
 np.random.seed(42)
 
