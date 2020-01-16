@@ -1,4 +1,4 @@
-
+import math
 def accuracy(y_hat, y):
 
     """
@@ -34,6 +34,17 @@ def precision(y_hat, y, cls):
     Output:
     > Returns the precision as float
     """
+    assert(y_hat.size==y.size)
+    TP = 0
+    TP_FP = 0
+    for i in range(len(y_hat)):
+        if(y_hat[i]==cls):
+            if(y_hat[i]==y[i]):
+                TP+=1
+            TP_FP +=1
+    return TP/TP_FP
+
+
     pass
 
 def recall(y_hat, y, cls):
@@ -47,6 +58,15 @@ def recall(y_hat, y, cls):
     Output:
     > Returns the recall as float
     """
+    assert(y_hat.size==y.size)
+    TP = 0
+    TP_TN = 0
+    for i in range(len(y_hat)):
+        if(y[i]==cls):
+            if(y[i]==y_hat[i]):
+                TP+=1
+            TP_TN +=1
+    return TP/TP_TP
     pass
 
 def rmse(y_hat, y):
@@ -60,6 +80,10 @@ def rmse(y_hat, y):
     > Returns the rmse as float
     """
 
+    ans = 0
+    for i in range(len(y_hat)):
+        ans = ans + (y_hat[i] - y[i])**2
+    return(math.sqrt(ans))
     pass
 
 def mae(y_hat, y):
@@ -72,4 +96,8 @@ def mae(y_hat, y):
     Output:
     > Returns the mae as float
     """
+    ans = 0
+    for i in range(len(y_hat)):
+        ans = ans + abs(y_hat[i] - y[i])
+    return((ans)/len(y))
     pass

@@ -1,5 +1,6 @@
 
 import math
+import numpy as np
 
 def entropy(Y):
     sample_count,num =  np.unique(Y,return_counts=True)
@@ -53,12 +54,9 @@ def gini_info(Y,attr):
     gini_val = 0.0
 
 
-def STD(Y):
-    rows = Y.iloc[:, -1]
-    return rows.std()
 
 def STD(Y, attr):
-    initial_variance = STD(Y)
+    initial_variance = np.var(np.array(Y))
     y_val = dict()
     indexes=list(Y.index)
     for index in indexes:
@@ -66,8 +64,9 @@ def STD(Y, attr):
     for index in indexes:
         y_val[attr[index]].append(Y[index])
     for i in y_val:
-        initial_gain-=STD(y_val[i])*(len(y_val[i])/len(list(Y.index)))
-    return(initial_gain)
+        initial_variance-=np.var(np.array(y_val[i]))*(len(y_val[i])/len(list(Y.index)))
+    return(initial_variance)
+
 
 
 
