@@ -95,15 +95,15 @@ class DecisionTree():
 
 
     def ID3_discrete_real(self,x,y,row_index,depth):
-        node = Node(None)
+        tree = dict()
         subset_x = x.iloc[row_index,:]
         subset_y = y.iloc[row_index]
         if(len(list(set(subset_y))) == 1):
-            node.predicted_class=list(set(subset_y))[0]
-            return(node)
+            tree['terminal']=list(set(subset_y))[0]
+            return(tree)
         if(depth == 0):
-            node.predicted_class=np.mean(subset_y)
-            return(node)
+            tree['terminal']=np.mean(subset_y)
+            return(tree)
         max_info = -99999
         info_key = ""
         temparr1 = []
@@ -117,10 +117,10 @@ class DecisionTree():
             if(len(row_index)>1):    
                 row_index.remove(info_key)
         if(info_key!=""):
-            node.index = info_key
+            tree[info_key] = dict()
             for i in set(subset_x[info_key]):
-                node.child.append(self.ID3_discrete_real(x.drop(columns = info_key),y,list(subset_x[subset_x[info_key] == i].index),depth-1))
-        return(node)
+                tree[info_key][i]=self.ID3_discrete_real(x.drop(columns = info_key),y,list(subset_x[subset_x[info_key] == i].index),depth-1)
+        return(tree)
 
     def Real_Discrete(self,X,Y,depth):
         X[X.columns[-1] + 1] = Y
@@ -190,7 +190,7 @@ class DecisionTree():
         subset_y = y.iloc[row_index] 
         node = Node(None)
         if(len(subset_x) == 0 or len(subset_y) ==0):
-            return(node)
+            return
         if(depth == 0):
             node.predicted_class = np.mean(subset_y)
             return(node)
@@ -247,20 +247,8 @@ class DecisionTree():
                 return(ans)
         else:
             tree = self.tree
-            if(tree.child != []):
-                ans = []
-                for i in range(len(X)):
-                    tree1 = self.tree
-                    print('dabid')
-                    print(tree1.index)
-                    while(tree1.predicted_class==None):
-                        ind = X.iloc[i][tree.index]
-                        for chil in tree.child:
-                            print(chil.index)
-                            if(chil.index == ind):
-                                tree1 = chil
-                    ans.append(tree1.predicted_class)
-                return(ans)
+            if(type(tree) == type(dict())):
+                return
             else:
                 ans = []
                 for i in range(len(X)):
