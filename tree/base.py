@@ -10,13 +10,13 @@ You will be expected to use this to make trees for:
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from .utils import entropy, information_gain, gini_index,STD,best_split
+from .utils import entropy, information_gain, gini_index,STD,best_split,split,info_gain_real_discrete,best_split_Real_Real
 
 np.random.seed(42)
 class Node:
     def __init__(self, predicted_class):
         self.predicted_class = predicted_class
-        self.feature_index = 0
+        self.index = 0
         self.threshold = 0
         self.left = None
         self.right = None
@@ -36,18 +36,19 @@ class DecisionTree():
         pass
 
     def fit(self, X, Y):
-        if(X.dtype[0] == "category" and Y.dtype[0] == "category"):
+        if(str(X.dtype) == "category" and str(Y.dtype)  == "category"):
             for crit in self.criterion:
                 if(crit == "information_gain"):
                     self.tree = self.ID3(X,Y,list(X.index),self.max_depth)
                 elif(crit == "gini_index"):
-                    self.tree = None
-        elif(X.dtype[0] == "category" and Y.dtype[0] != "category"):
+                    self.tree = self.ID3(X,Y,list(X.index),self.max_depth)
+        elif(str(X.dtype)  == "category" and str(Y.dtype)  != "category"):
             self.tree = self.ID3_discrete_real(X,Y,list(X.index),self.max_depth)  
-        elif(X.dtype[0]!="category" and Y.dtype[0] == "category"):
-            self.tree = self.ID3_discrete_real(X,Y,list(X.index),self.max_depth) 
-        elif(X.dtype[0] != "category" and Y.dtype[0] != "category"):
-            return  
+        elif(str(X.dtype) !="category" and str(Y.dtype)  == "category"):
+            self.tree = self.Real_Discrete(X,Y,self.max_depth) 
+        elif(str(X.dtype)  != "category" and str(Y.dtype)  != "category"):
+            self.tree = self.realreal(pd.core.frame.DataFrame(X),pd.core.series.Series(Y),list(X.index),self.max_depth)
+
 
         """
         Function to train and construct the decision tree
@@ -80,7 +81,7 @@ class DecisionTree():
             temparr1.append(information_gain(subset_y,subset_x[i]))
             temparr2.append(i)
         max_info = max(temparr1)
-        infor_key = temparr2[temparr1.index(max(temparr1))]
+        info_key = temparr2[temparr1.index(max(temparr1))]
         if(info_key in row_index):
             if(len(row_index)>1):    
                 row_index.remove(info_key)
@@ -89,6 +90,8 @@ class DecisionTree():
             for i in set(subset_x[info_key]):
                 tree[info_key][i]=self.ID3(x.drop(columns = info_key),y,list(subset_x[subset_x[info_key] == i].index),depth-1)
         return(tree)
+
+
 
     def ID3_discrete_real(self,x,y,row_index,depth):
         tree = dict()
@@ -99,7 +102,6 @@ class DecisionTree():
             return(tree)
         if(depth == 0):
             tree['terminal']=np.mean(subset_y)
-            print(np.mean(subset_y))
             return(tree)
         max_info = -99999
         info_key = ""
@@ -119,44 +121,115 @@ class DecisionTree():
                 tree[info_key][i]=self.ID3_discrete_real(x.drop(columns = info_key),y,list(subset_x[subset_x[info_key] == i].index),depth-1)
         return(tree)
 
-    def ID3_real_discrete(self,x,y,row_index,depth):
-        node  = Node(None)
-        subset_x = x.iloc[row_index,:]
-        subset_y = y.iloc[row_index]
+    def Real_Discrete(self,X,Y,depth):
+        X[X.columns[-1] + 1] = Y
+        data = np.array(X)
+        return self.build_real_Discrete(data,depth)
+
+
+    def build_real_Discrete(self,data,depth):
+        node = Node(None)
+        if(len(data) == 0):
+            return
+        best_gain,threshold,index,left, right = best_split(data)
+        node.index = index
+        node.threshold = threshold
+        if(best_gain == 0):
+            nums = dict()
+            for i in left:
+                if(i[-1] in nums):
+                    nums[i[-1]]+=1
+                else:
+                    nums[i[-1]] = 1
+            for i in right:
+                if(i[-1] in nums):
+                    nums[i[-1]]+=1
+                else:
+                    nums[i[-1]] = 1
+            max_class = [key  for (key, value) in nums.items() if value == max(nums.values())][0]
+            node.predicted_class = max_class
+            return node
+        if(len(left) ==0 and len(right) == 0):
+            return node
+        if(len(left) ==0 or len(right) == 0):
+            nums = dict()
+            for i in left:
+                if(i[-1] in nums):
+                    nums[i[-1]]+=1
+                else:
+                    nums[i[-1]] = 1
+            for i in right:
+                if(i[-1] in nums):
+                    nums[i[-1]]+=1
+                else:
+                    nums[i[-1]] = 1
+            max_class = [key  for (key, value) in nums.items() if value == max(nums.values())][0]
+            node.predicted_class = max_class
+            return node
         if(depth == 0):
             nums = dict()
-            for i in y:
-                if(i in nums):
-                    nums[i]+=1
+            for i in left:
+                if(i[-1] in nums):
+                    nums[i[-1]]+=1
                 else:
-                    nums[i] = 1
+                    nums[i[-1]] = 1
+            for i in right: 
+                if(i[-1] in nums):
+                    nums[i[-1]]+=1
+                else:
+                    nums[i[-1]] = 1
             max_class = [key  for (key, value) in nums.items() if value == max(nums.values())][0]
-            node.predicted_class =  max_class
+            node.predicted_class = max_class
+        node.left = self.build_real_Discrete(left,depth-1)
+        node.right = self.build_real_Discrete(right,depth-1)
+        return node
+
+    def realreal(self,X,y,row_index,depth):
+        subset_x = X.iloc[row_index,:]
+        subset_y = y.iloc[row_index] 
+        node = Node(None)
+        if(len(subset_x) == 0 or len(subset_y) ==0):
+            return
+        if(depth == 0):
+            node.predicted_class = np.mean(subset_y)
             return(node)
         if(len(list(set(subset_y))) == 1):
-            node.predicted_class =list(set(subset_y))[0]
+            node.predicted_class = np.array(subset_y)[0]
             return(node)
-        else:
-            max_info = 99999
-            info_key = ""
-            threshold=0
-            for i in subset_x:
-                split=best_split(subset_y,subset_x[i])
-                if split[0]<max_info:
-                    max_info=split[0]
-                    threshold=split[1]
-                    info_key=i
-            node.feature_index = info_key
-            node.threshold = split[1]
-            node.right =self.ID3_real_discrete(x.drop(columns = info_key),y,list(subset_x[subset_x[info_key] >threshold ].index),depth-1)
-            node.left =self.ID3_real_discrete(x.drop(columns = info_key),y,list(subset_x[subset_x[info_key] <=threshold].index),depth-1)
-        return(node)
-
-
-
+        max_info = -99999
+        info_key = ""
+        temparr1 = []
+        temparr2 = []
+        temparr3 = []
+        for i in subset_x:
+            p,q = best_split_Real_Real(np.array(subset_y),np.array(subset_x[i]))
+            temparr1.append(p)
+            temparr2.append(i)
+            temparr3.append(q)
+        if(len(temparr1)!=0):       
+            max_info = max(temparr1)
+            info_key = temparr2[temparr1.index(max(temparr1))]
+            mean_opt = temparr3[temparr1.index(max(temparr1))]
+            node.index = info_key  
+            if(info_key in row_index):
+                if(len(row_index)>1):    
+                    row_index.remove(info_key)
+            if(info_key!=""):
+                max_info = max(temparr1)
+                info_key = temparr2[temparr1.index(max(temparr1))]
+                mean_opt = temparr3[temparr1.index(max(temparr1))]
+                node.index = info_key  
+                node.threshold = mean_opt
+                node.right = self.realreal(X.drop(columns=info_key),y,list(subset_x[subset_x[info_key]>mean_opt].index),depth-1)
+                node.left = self.realreal(X.drop(columns=info_key),y,list(subset_x[subset_x[info_key] <= mean_opt].index),depth-1)
+                if(node.left == None):
+                    node.predicted_class = np.mean(subset_y)
+                if(node.right == None):
+                    node.predicted_class = np.mean(subset_y)
+                return(node)
 
     def predict(self, X):
-        if(X.dtype[0] != "category"):
+        if(str(X.dtype) != "category"):
             tree = self.tree
             if(type(tree) == type(dict)):
                 return
@@ -165,7 +238,7 @@ class DecisionTree():
                 for i in range(len(X)):
                     tree1 = tree
                     while(tree1.predicted_class==None):
-                        if(X.iloc[i][tree1.feature_index]> tree1.threshold):
+                        if(X.iloc[i][tree1.index]> tree1.threshold):
                             tree1 = tree1.right
                         else:
                             tree1 = tree1.left
@@ -173,12 +246,20 @@ class DecisionTree():
                 return(ans)
 
         else:
-            return
-
-
-
-
-
+            tree = self.tree
+            if(type(tree) == type(dict)):
+                return
+            else:
+                ans = []
+                for i in range(len(X)):
+                    tree1 = tree
+                    while(tree1.predicted_class==None):
+                        if(X.iloc[i][tree1.index]>= tree1.threshold):
+                            tree1 = tree1.right
+                        else:
+                            tree1 = tree1.left
+                    ans.append(tree1.predicted_class)
+                return(ans)
 
         """
         Funtion to run the decision tree on a data point
@@ -189,6 +270,35 @@ class DecisionTree():
         """
 
     def plot(self):
+        print('plot')
+        if(type(self.tree) == type(dict)):
+            print(dict)
+        else:
+            d = dict()
+            d[0] = [self.tree.threshold,self.tree.index]
+            self.recursive_plot(self.tree,1,d)
+            for i in d.keys():
+                print(d[i])
+                print(" ")
+            print(d.keys())
+            
+
+    def recursive_plot(self,tree,depth,dic):
+        if(tree == None):
+            return
+        elif(tree.predicted_class != None):
+            if(depth not in dic):
+                dic[depth] = [[['leaf'],[tree.predicted_class]]]
+            else:
+                dic[depth].append([['leaf'],[tree.predicted_class]])
+        else:
+            if(depth not in dic):
+                dic[depth] = [[[tree.left.threshold,tree.index],[tree.right.threshold,tree.index]]]
+            else:
+                dic[depth].append([[tree.left.threshold,tree.index],[tree.right.threshold,tree.index]])
+        self.recursive_plot(tree.left,depth+1,dic)
+        self.recursive_plot(tree.right,depth+1,dic)
+
 
 
         

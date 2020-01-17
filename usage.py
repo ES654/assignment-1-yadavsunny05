@@ -17,6 +17,7 @@ np.random.seed(42)
 # Test case 1
 # Real Input and Real Output
 
+
 N = 30
 P = 5
 X = pd.DataFrame(np.random.randn(N, P))

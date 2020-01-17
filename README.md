@@ -33,7 +33,6 @@ The code should be written in Python and not use existing libraries other than t
 4. Create some fake data to do some experiments on the runtime complexity of your decision tree algorithm. Create a dataset with N samples and M binary features. Vary M and N to plot the time taken for: 1) learning the tree, 2) predicting for test data. How do these results compare with theoretical time complexity for decision tree creation and prediction. You should do the comparison for all the four cases of decision trees. **[2 marks]**	
 
     >You should be editing `experiments.py` for the code containing the experiments and 1.md for the plots and their analysis. 
-	
 
 
 You can write your queries about assignment 1 in this [Google Doc](https://docs.google.com/document/d/1F94IMZWgsdlNXAzkRMXOpcfg7RXhEcPuv37KtY391_M/edit?usp=sharing).
@@ -46,5 +45,7 @@ The Google Doc will be the **_only_** medium for query resolution.
 References : - 
 
 1 https://machinelearningmastery.com/implement-decision-tree-algorithm-scratch-python/
+
 2 https://github.com/joachimvalente/decision-tree-cart/blob/master/minimal_cart.py#L14-L79
+
 3 https://towardsdatascience.com/decision-tree-from-scratch-in-python-46e99dfea775
