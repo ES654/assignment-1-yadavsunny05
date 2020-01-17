@@ -22,6 +22,8 @@ N = 30
 P = 5
 X = pd.DataFrame(np.random.randn(N, P))
 y = pd.Series(np.random.randn(N))
+X.dtype = 'a'
+# y.dtype = 'b'
 
 
 for criteria in ['information_gain', 'gini_index']:
@@ -40,7 +42,8 @@ N = 30
 P = 5
 X = pd.DataFrame(np.random.randn(N, P))
 y = pd.Series(np.random.randint(P, size = N), dtype="category")
-
+X.dtype = 'a'
+# y.dtype = 'b'
 for criteria in ['information_gain', 'gini_index']:
     tree = DecisionTree(criterion=criteria) #Split based on Inf. Gain
     tree.fit(X, y)
@@ -60,7 +63,8 @@ N = 30
 P = 5
 X = pd.DataFrame({i:pd.Series(np.random.randint(P, size = N), dtype="category") for i in range(5)})
 y = pd.Series(np.random.randint(P, size = N), dtype="category")
-
+X.dtype = 'a'
+# y.dtype = 'b'
 for criteria in ['information_gain', 'gini_index']:
     tree = DecisionTree(criterion=criteria) #Split based on Inf. Gain
     tree.fit(X, y)
@@ -79,12 +83,20 @@ N = 30
 P = 5
 X = pd.DataFrame({i:pd.Series(np.random.randint(P, size = N), dtype="category") for i in range(5)})
 y = pd.Series(np.random.randn(N))
+X.dtype = "category"
 
+t = tree.tree
+# y.dtype = 'b'
+for i in X.iloc[1]:
+    t = t[i]
+    print(t)
+    
+d = tree.tree
 for criteria in ['information_gain', 'gini_index']:
     tree = DecisionTree(criterion=criteria) #Split based on Inf. Gain
     tree.fit(X, y)
     y_hat = tree.predict(X)
     tree.plot()
-    print('Criteria :', criteria)
-    print('RMSE: ', rmse(y_hat, y))
-    print('MAE: ', mae(y_hat, y))
+    # print('Criteria :', criteria)
+    # print('RMSE: ', rmse(y_hat, y))
+    # print('MAE: ', mae(y_hat, y))

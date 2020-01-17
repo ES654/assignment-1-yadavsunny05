@@ -38,16 +38,20 @@ class DecisionTree():
 
     def fit(self, X, Y):
         if(str(X.dtype) == "category" and str(Y.dtype)  == "category"):
+            print(1)
             for crit in self.criterion:
                 if(crit == "information_gain"):
                     self.tree = self.ID3(X,Y,list(X.index),self.max_depth)
                 elif(crit == "gini_index"):
                     self.tree = self.ID3(X,Y,list(X.index),self.max_depth)
         elif(str(X.dtype)  == "category" and str(Y.dtype)  != "category"):
+            print(2)
             self.tree = self.ID3_discrete_real(X,Y,list(X.index),self.max_depth)  
         elif(str(X.dtype) !="category" and str(Y.dtype)  == "category"):
+            print(3)
             self.tree = self.Real_Discrete(X,Y,self.max_depth) 
         elif(str(X.dtype)  != "category" and str(Y.dtype)  != "category"):
+            print(4)
             self.tree = self.realreal(pd.core.frame.DataFrame(X),pd.core.series.Series(Y),list(X.index),self.max_depth)
 
 
