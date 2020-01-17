@@ -20,6 +20,7 @@ class Node:
         self.threshold = 0
         self.left = None
         self.right = None
+        self.child = []
 
 class DecisionTree():
     def __init__(self, criterion, max_depth = 4):
@@ -94,15 +95,15 @@ class DecisionTree():
 
 
     def ID3_discrete_real(self,x,y,row_index,depth):
-        tree = dict()
+        node = Node(None)
         subset_x = x.iloc[row_index,:]
         subset_y = y.iloc[row_index]
         if(len(list(set(subset_y))) == 1):
-            tree['terminal']=list(set(subset_y))[0]
-            return(tree)
+            node.predicted_class=list(set(subset_y))[0]
+            return(node)
         if(depth == 0):
-            tree['terminal']=np.mean(subset_y)
-            return(tree)
+            node.predicted_class=np.mean(subset_y)
+            return(node)
         max_info = -99999
         info_key = ""
         temparr1 = []
@@ -116,10 +117,10 @@ class DecisionTree():
             if(len(row_index)>1):    
                 row_index.remove(info_key)
         if(info_key!=""):
-            tree[info_key] = dict()
+            node.index = info_key
             for i in set(subset_x[info_key]):
-                tree[info_key][i]=self.ID3_discrete_real(x.drop(columns = info_key),y,list(subset_x[subset_x[info_key] == i].index),depth-1)
-        return(tree)
+                node.child.append(self.ID3_discrete_real(x.drop(columns = info_key),y,list(subset_x[subset_x[info_key] == i].index),depth-1))
+        return(node)
 
     def Real_Discrete(self,X,Y,depth):
         X[X.columns[-1] + 1] = Y
@@ -189,7 +190,7 @@ class DecisionTree():
         subset_y = y.iloc[row_index] 
         node = Node(None)
         if(len(subset_x) == 0 or len(subset_y) ==0):
-            return
+            return(node)
         if(depth == 0):
             node.predicted_class = np.mean(subset_y)
             return(node)
@@ -231,7 +232,7 @@ class DecisionTree():
     def predict(self, X):
         if(str(X.dtype) != "category"):
             tree = self.tree
-            if(type(tree) == type(dict)):
+            if(type(tree) == type(dict())):
                 return
             else:
                 ans = []
@@ -244,11 +245,22 @@ class DecisionTree():
                             tree1 = tree1.left
                     ans.append(tree1.predicted_class)
                 return(ans)
-
         else:
             tree = self.tree
-            if(type(tree) == type(dict)):
-                return
+            if(tree.child != []):
+                ans = []
+                for i in range(len(X)):
+                    tree1 = self.tree
+                    print('dabid')
+                    print(tree1.index)
+                    while(tree1.predicted_class==None):
+                        ind = X.iloc[i][tree.index]
+                        for chil in tree.child:
+                            print(chil.index)
+                            if(chil.index == ind):
+                                tree1 = chil
+                    ans.append(tree1.predicted_class)
+                return(ans)
             else:
                 ans = []
                 for i in range(len(X)):
@@ -270,9 +282,8 @@ class DecisionTree():
         """
 
     def plot(self):
-        print('plot')
-        if(type(self.tree) == type(dict)):
-            print(dict)
+        if(type(self.tree) == type(dict())):
+            print(self.tree)
         else:
             d = dict()
             d[0] = [self.tree.threshold,self.tree.index]
